@@ -1,4 +1,4 @@
-# Daily Security Digest Bot
+# VulnCrier - Your quick Python Daily Threat Intel Digest
 
 A Python script that aggregates security intelligence from multiple sources and delivers a daily digest to a Webex room. It pulls from CISA's Known Exploited Vulnerabilities (KEV) catalog, BleepingComputer's RSS feed, and the GitHub Security Advisory Database, then formats everything into a single Markdown-formatted Webex message.
 

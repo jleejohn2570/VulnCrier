@@ -147,7 +147,7 @@ The script will automatically load this file via `python-dotenv`.
 ## Running the Script
 
 ```bash
-python security_digest.py
+python vulncrier.py
 ```
 
 If required environment variables are missing, the script will exit immediately with a clear error message rather than failing silently.
@@ -161,7 +161,7 @@ If required environment variables are missing, the script will exit immediately 
 1. Open **Task Scheduler** and click **Create Basic Task**
 2. Set the trigger to **Daily** at your preferred time
 3. Set the action to **Start a Program**
-4. Set the program to your Python executable (e.g. `C:\Python311\python.exe`) and the argument to the full path of `security_digest.py`
+4. Set the program to your Python executable (e.g. `C:\Python311\python.exe`) and the argument to the full path of `vulncrier.py`
 5. Ensure your environment variables are set as persistent **User** or **System** variables (see above)
 
 ### macOS / Linux — cron
@@ -171,7 +171,7 @@ Run daily at 8:00 AM:
 crontab -e
 ```
 ```
-0 8 * * * /usr/bin/python3 /path/to/security_digest.py
+0 8 * * * /usr/bin/python3 /path/to/vulncrier.py
 ```
 
 Remember to set variables in the crontab itself if they are not available system-wide (see Linux Option C above).
@@ -182,7 +182,7 @@ Remember to set variables in the crontab itself if they are not available system
 
 ```
 .
-├── security_digest.py   # Main script
+├── vulncrier.py   # Main script
 ├── .env                 # Local credentials (never commit this)
 ├── .gitignore           # Should include .env
 └── README.md            # This file

@@ -20,7 +20,7 @@ if not WEBEX_BOT_TOKEN or not WEBEX_ROOM_ID:
 
 # Only report GitHub advisories at or above this severity.
 # Options: "low", "medium", "high", "critical"
-GITHUB_MIN_SEVERITY = "high"
+GITHUB_MIN_SEVERITY = "critical"
 
 SEVERITY_RANK = {"low": 1, "medium": 2, "high": 3, "critical": 4}
 
@@ -112,7 +112,7 @@ def fetch_github_advisories(cutoff: datetime.datetime):
             advisories = json.loads(response.read().decode("utf-8"))
 
         # Filter locally by minimum severity threshold.
-        min_rank = SEVERITY_RANK.get(GITHUB_MIN_SEVERITY, 3)
+        min_rank = SEVERITY_RANK.get(GITHUB_MIN_SEVERITY, 4)
         filtered = [
             a for a in advisories
             if SEVERITY_RANK.get((a.get("severity") or "").lower(), 0) >= min_rank

@@ -2,6 +2,7 @@ import json
 import datetime
 import urllib.request
 import urllib.error
+import urllib.parse
 from xml.etree import ElementTree
 import requests # type: ignore
 import os
@@ -9,9 +10,11 @@ import os
 KEV_API = "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json"
 BLEEPING_RSS = "https://www.bleepingcomputer.com/feed/"
 GITHUB_ADVISORY_API = "https://api.github.com/advisories"
+VULNCHECK_KEV_API = "https://api.vulncheck.com/v3/index/vulncheck-kev"
 WEBEX_BOT_TOKEN = os.environ.get("WEBEX_BOT_TOKEN")
 WEBEX_ROOM_ID = os.environ.get("WEBEX_ROOM_ID")
 WEBEX_API = "https://webexapis.com/v1/messages"
+VULNCHECK_API_TOKEN = os.environ.get("VULNCHECK_API_TOKEN")
 
 if not WEBEX_BOT_TOKEN or not WEBEX_ROOM_ID:
     raise EnvironmentError(
@@ -128,6 +131,73 @@ def fetch_github_advisories(cutoff: datetime.datetime):
         return []
 
 
+def fetch_vulncheck_kev(cutoff: datetime.datetime):
+    """Fetch VulnCheck KEV entries added since cutoff. Requires VULNCHECK_API_TOKEN."""
+    if not VULNCHECK_API_TOKEN:
+        print("VULNCHECK_API_TOKEN not set, skipping VulnCheck KEV.")
+        return []
+
+    results = []
+    cursor = None
+
+    while True:
+        params = {"limit": 100}
+        if cursor:
+            params["cursor"] = cursor
+        url = VULNCHECK_KEV_API + "?" + urllib.parse.urlencode(params)
+
+        try:
+            req = urllib.request.Request(
+                url,
+                headers={
+                    "Authorization": f"Bearer {VULNCHECK_API_TOKEN}",
+                    "Accept": "application/json",
+                    "User-Agent": "security-digest-bot/1.0",
+                },
+            )
+            with urllib.request.urlopen(req) as response:
+                data = json.loads(response.read().decode("utf-8"))
+        except urllib.error.URLError as e:
+            print(f"Error fetching VulnCheck KEV: {e}")
+            break
+        except json.JSONDecodeError as e:
+            print(f"Error parsing VulnCheck KEV response: {e}")
+            break
+
+        entries = data.get("data", [])
+        if not entries:
+            break
+
+        page_has_recent = False
+        for entry in entries:
+            date_str = entry.get("date_added", "")
+            try:
+                added = datetime.datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%fZ").replace(
+                    tzinfo=datetime.timezone.utc
+                )
+            except ValueError:
+                try:
+                    added = datetime.datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%SZ").replace(
+                        tzinfo=datetime.timezone.utc
+                    )
+                except ValueError:
+                    continue
+
+            if added >= cutoff:
+                results.append(entry)
+                page_has_recent = True
+
+        # VulnCheck returns newest-first; stop paginating once entries are older than cutoff.
+        if not page_has_recent:
+            break
+
+        cursor = data.get("_next")
+        if not cursor:
+            break
+
+    return results
+
+
 def send_to_webex(markdown_message):
     """Send a Markdown-formatted message to a Webex room."""
     headers = {
@@ -157,6 +227,9 @@ def main():
     print("Fetching GitHub Security Advisories...")
     github_advisories = fetch_github_advisories(cutoff)
 
+    print("Fetching VulnCheck KEV data...")
+    vulncheck_kev = fetch_vulncheck_kev(cutoff)
+
     # --- CISA KEV: compare dates only to avoid timezone/time-of-day false negatives ---
     cutoff_date = cutoff.date()
     recent_kev = [
@@ -177,7 +250,7 @@ def main():
     # GitHub advisories are already filtered by the API + local severity check.
     recent_github = github_advisories
 
-    if not recent_kev and not recent_bleep and not recent_github:
+    if not recent_kev and not recent_bleep and not recent_github and not vulncheck_kev:
         print("No new updates in the last 24 hours, skipping Webex message.")
         return
 
@@ -241,18 +314,33 @@ New advisories (severity ≥ {GITHUB_MIN_SEVERITY}) in last 24 hours: **{len(rec
             ) if vulns else "Unknown package"
 
             markdown += (
-                f"- **[{ghsa_id}]({html_url})** ({cve_id}) — "
-                f"**{severity}** — {summary} — *{packages}*\n"
+                f"- **{packages}** — [{ghsa_id}]({html_url}) ({cve_id}) — "
+                f"**{severity}** — {summary}\n"
             )
     else:
         markdown += f"- No new advisories at or above **{GITHUB_MIN_SEVERITY}** severity in the last 24 hours\n"
+
+    markdown += f"""
+---
+
+### 🔍 VulnCheck KEV
+New entries in last 24 hours: **{len(vulncheck_kev)}**
+
+#### Recent VulnCheck KEV Entries:
+"""
+    if vulncheck_kev:
+        for entry in vulncheck_kev:
+            cve_id = entry.get("cve", "N/A")
+            name = entry.get("vulnerability_name") or entry.get("name", "Unknown")
+            vendor = entry.get("vendor_project") or entry.get("vendor", "Unknown")
+            added = entry.get("date_added", "")[:10]
+            markdown += f"- **{cve_id}** — {name} ({vendor}) — Added: {added}\n"
+    else:
+        markdown += "- No new VulnCheck KEV entries in the last 24 hours\n"
 
     send_to_webex(markdown)
     print("Message sent to Webex successfully.")
 
 
 if __name__ == "__main__":
-    # urllib.parse is used in fetch_github_advisories; import it here
-    # so the script fails fast if something is missing rather than at call time.
-    import urllib.parse
     main()

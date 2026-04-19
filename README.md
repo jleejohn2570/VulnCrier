@@ -9,6 +9,7 @@ A Python script that aggregates security intelligence from multiple sources and 
 - **CISA KEV** — Alerts on newly added Known Exploited Vulnerabilities from the last 24 hours
 - **BleepingComputer** — Top security headlines from the last 24 hours
 - **GitHub Security Advisories** — New advisories filtered by severity (default: High and above), including affected package and ecosystem
+- **Vulncheck KEV** - Alerts on newly added Vulncheck KEV items from the last 24 hours
 
 ---
 
@@ -38,7 +39,7 @@ The script reads sensitive credentials from environment variables so they are ne
 | `WEBEX_BOT_TOKEN` | Your Webex Bot Bearer token |
 | `WEBEX_ROOM_ID` | The ID of the Webex room to post into |
 
-You can also optionally adjust the `GITHUB_MIN_SEVERITY` constant inside the script to control the minimum advisory severity that gets reported. Accepted values are `low`, `medium`, `high`, and `critical`. The default is `high`.
+You can also optionally adjust the `GITHUB_MIN_SEVERITY` constant inside the script to control the minimum advisory severity that gets reported. Accepted values are `low`, `medium`, `high`, and `critical`. The default is `high`. 
 
 ---
 
@@ -195,6 +196,7 @@ Remember to set variables in the crontab itself if they are not available system
 - Credentials are loaded from environment variables or a `.env` file and are never hardcoded in source
 - The GitHub Advisory API is accessed without authentication, as only public data is consumed
 - The CISA KEV and BleepingComputer feeds are public endpoints requiring no credentials
+- The Vulncheck KEV requires a free account and token
 
 ---
 

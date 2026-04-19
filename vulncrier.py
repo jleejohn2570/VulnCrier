@@ -19,9 +19,9 @@ WEBEX_ROOM_ID = os.environ.get("WEBEX_ROOM_ID")
 WEBEX_API = "https://webexapis.com/v1/messages"
 VULNCHECK_API_TOKEN = os.environ.get("VULNCHECK_API_TOKEN")
 
-if not WEBEX_BOT_TOKEN or not WEBEX_ROOM_ID:
+if not WEBEX_BOT_TOKEN or not WEBEX_ROOM_ID or not VULNCHECK_API_TOKEN:
     raise EnvironmentError(
-        "Missing required environment variables WEBEX_BOT_TOKEN and/or WEBEX_ROOM_ID. Please set them before running the script."
+        "Missing required environment variables WEBEX_BOT_TOKEN and/or WEBEX_ROOM_ID and/or VULNCHECK_API_TOKEN. Please set them before running the script."
     )
 
 # Only report GitHub advisories at or above this severity.

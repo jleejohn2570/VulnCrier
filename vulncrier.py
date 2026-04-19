@@ -6,6 +6,9 @@ import urllib.parse
 from xml.etree import ElementTree
 import requests # type: ignore
 import os
+from dotenv import load_dotenv # type: ignore
+
+load_dotenv()
 
 KEV_API = "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json"
 BLEEPING_RSS = "https://www.bleepingcomputer.com/feed/"
@@ -330,9 +333,21 @@ New entries in last 24 hours: **{len(vulncheck_kev)}**
 """
     if vulncheck_kev:
         for entry in vulncheck_kev:
-            cve_id = entry.get("cve", "N/A")
-            name = entry.get("vulnerability_name") or entry.get("name", "Unknown")
-            vendor = entry.get("vendor_project") or entry.get("vendor", "Unknown")
+            cve_raw = entry.get("cve", "N/A")
+            cve_id = ", ".join(cve_raw) if isinstance(cve_raw, list) else cve_raw
+            name = (
+                entry.get("vulnerability_name")
+                or entry.get("vulnerabilityName")
+                or entry.get("name")
+                or entry.get("summary")
+                or "Unknown"
+            )
+            vendor = (
+                entry.get("vendor_project")
+                or entry.get("vendorProject")
+                or entry.get("vendor")
+                or "Unknown"
+            )
             added = entry.get("date_added", "")[:10]
             markdown += f"- **{cve_id}** — {name} ({vendor}) — Added: {added}\n"
     else:

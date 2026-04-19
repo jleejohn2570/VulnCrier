@@ -32,12 +32,13 @@ All other dependencies (`json`, `datetime`, `urllib`, `xml.etree.ElementTree`, `
 
 ## Configuration
 
-The script reads sensitive credentials from environment variables so they are never hardcoded in source. You will need to set two variables before running:
+The script reads sensitive credentials from environment variables so they are never hardcoded in source. You will need to set three variables before running:
 
 | Variable | Description |
 |---|---|
 | `WEBEX_BOT_TOKEN` | Your Webex Bot Bearer token |
 | `WEBEX_ROOM_ID` | The ID of the Webex room to post into |
+| `VULNCHECK_API_TOKEN` | The token from Vulncheck |
 
 You can also optionally adjust the `GITHUB_MIN_SEVERITY` constant inside the script to control the minimum advisory severity that gets reported. Accepted values are `low`, `medium`, `high`, and `critical`. The default is `high`. 
 
@@ -51,6 +52,7 @@ You can also optionally adjust the `GITHUB_MIN_SEVERITY` constant inside the scr
 ```cmd
 set WEBEX_BOT_TOKEN=your_token_here
 set WEBEX_ROOM_ID=your_room_id_here
+set VULNCHECK_API_TOKEN=your_token_here
 ```
 
 **Option B — Persistent (PowerShell, survives reboots):**
@@ -75,6 +77,7 @@ set WEBEX_ROOM_ID=your_room_id_here
 ```bash
 export WEBEX_BOT_TOKEN="your_token_here"
 export WEBEX_ROOM_ID="your_room_id_here"
+export VULNCHECK_API_KEY="your_token_here"
 ```
 
 **Option B — Persistent (add to your shell profile):**
@@ -83,6 +86,7 @@ For Zsh (default on macOS Catalina and later), add to `~/.zshrc`:
 ```bash
 export WEBEX_BOT_TOKEN="your_token_here"
 export WEBEX_ROOM_ID="your_room_id_here"
+export VULNCHECK_API_KEY="your_token_here"
 ```
 
 For Bash, add to `~/.bash_profile` or `~/.bashrc` instead. Then reload the file:
@@ -98,6 +102,7 @@ source ~/.zshrc   # or source ~/.bash_profile
 ```bash
 export WEBEX_BOT_TOKEN="your_token_here"
 export WEBEX_ROOM_ID="your_room_id_here"
+export VULNCHECK_API_KEY="your_token_here"
 ```
 
 **Option B — Persistent (add to your shell profile):**
@@ -106,6 +111,7 @@ Add to `~/.bashrc` (or `~/.zshrc` if using Zsh):
 ```bash
 export WEBEX_BOT_TOKEN="your_token_here"
 export WEBEX_ROOM_ID="your_room_id_here"
+export VULNCHECK_API_KEY="your_token_here"
 ```
 
 Then reload:
@@ -123,6 +129,7 @@ Add at the top of the file:
 ```
 WEBEX_BOT_TOKEN=your_token_here
 WEBEX_ROOM_ID=your_room_id_here
+VULNCHECK_API_KEY="your_token_here"
 ```
 
 ---
@@ -134,6 +141,7 @@ If you prefer to manage credentials in a file (recommended for scheduled tasks o
 ```
 WEBEX_BOT_TOKEN=your_token_here
 WEBEX_ROOM_ID=your_room_id_here
+VULNCHECK_API_KEY="your_token_here"
 ```
 
 The script will automatically load this file via `python-dotenv`.

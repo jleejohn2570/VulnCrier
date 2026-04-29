@@ -47,7 +47,7 @@ Two constants at the top of the script control filtering behaviour:
 | Constant | Default | Description |
 |---|---|---|
 | `GITHUB_MIN_SEVERITY` | `"critical"` | Minimum severity for GitHub advisories. Options: `"low"`, `"medium"`, `"high"`, `"critical"` |
-| `NEWS_KEYWORDS` | *(list)* | Keywords used to filter Hacker News posts. Add or remove terms to tune signal-to-noise ratio. |
+| `NEWS_KEYWORDS` | *(list)* | Keywords used to filter cybersecurity-related posts. Add or remove terms to tune signal-to-noise ratio. |
 
 ---
 
